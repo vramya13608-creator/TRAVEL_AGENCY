@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Travel Desk - Booking and Tourism Trends</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--ink:#12262b;--sea:#0e4f5c;--mist:#eaf3f4;--paper:#fff;--sun:#f2b134;--coral:#c93f56;--ok:#23735a;--line:#cfe0e3;--mute:#53696e}
+*{box-sizing:border-box}html,body{margin:0}
+body{font:15px/1.5 "Instrument Sans",system-ui,sans-serif;color:var(--ink);background:var(--mist);display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+h1,h2,h3{font-family:"Bricolage Grotesque",Georgia,serif;margin:0;line-height:1.15}
+h1{font-size:30px;font-weight:800}h2{font-size:20px;font-weight:800;margin-bottom:12px}h3{font-size:16px;font-weight:600;margin-bottom:8px}
+aside{background:var(--sea);color:#fff;padding:22px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+aside .brand{font:800 22px "Bricolage Grotesque",serif;padding:0 10px 18px}
+aside a{color:#cfe6ea;text-decoration:none;padding:9px 10px;border-radius:6px}
+aside a:hover{background:#ffffff14}aside a.on{background:var(--sun);color:var(--ink);font-weight:600}
+aside button{margin-top:auto;background:none;border:1px solid #ffffff55;color:#cfe6ea}
+main{padding:28px;max-width:1200px;width:100%}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px}
+.kpi b{display:block;font:800 26px "Bricolage Grotesque",serif}.kpi span{color:var(--mute)}
+.board{background:var(--sea);color:var(--sun);border-radius:10px;padding:16px;margin-bottom:16px}
+.board h2{color:#fff}.board table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.board td,.board th{padding:7px 8px;text-align:left;border-bottom:1px solid #ffffff22}.board th{color:#9fc7cf;font-weight:500}
+.tag{padding:2px 8px;border-radius:99px;font-size:13px;font-weight:600}
+.open{background:#2a8f6f;color:#fff}.fill{background:var(--sun);color:var(--ink)}.full{background:var(--coral);color:#fff}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:16px}
+.ch{height:290px;position:relative}
+.tbl{overflow-x:auto}table.t{width:100%;border-collapse:collapse}
+.t th,.t td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.t th{color:var(--mute);font-weight:500}
+form.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;align-items:end}
+label{display:grid;gap:4px;font-weight:500}
+input,select,button{font:inherit;padding:8px 10px;border:1px solid #9db8bd;border-radius:6px;background:#fff;color:var(--ink)}
+button{cursor:pointer;background:var(--sea);color:#fff;border-color:var(--sea);font-weight:600}
+button.sm{padding:4px 9px;font-size:13px}button.alt{background:#fff;color:var(--sea)}button.bad{background:var(--coral);border-color:var(--coral)}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.st-CONFIRMED{color:var(--ok);font-weight:600}.st-CANCELLED{color:var(--coral);font-weight:600}
+.hm td{text-align:center;padding:6px;min-width:34px}.note{color:var(--mute);margin:8px 0}
+dialog{border:0;border-radius:12px;padding:22px;max-width:460px;width:92%}dialog::backdrop{background:#0e4f5c99}
+#toast{position:fixed;bottom:18px;right:18px;background:var(--ink);color:#fff;padding:11px 16px;border-radius:8px;display:none;max-width:340px;z-index:9}
+#toast.err{background:var(--coral)}
+@media(max-width:800px){body{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap}aside .brand{width:100%;padding-bottom:6px}aside button{margin:0}main{padding:16px}}
+</style></head><body>
+<aside id="nav"></aside><main id="main"></main><dialog id="dlg"></dialog><div id="toast" role="status"></div>
+<script>
+const K='traveldesk_v1',$=s=>document.querySelector(s);
+const inr=n=>'\u20B9'+Math.round(n).toLocaleString('en-IN');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fd=d=>d.toLocaleDateString('en-CA'),today=()=>fd(new Date());
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const METHODS=['UPI','CARD','CASH','NET_BANKING'];
+function seed(){
+ let s=7;const r=()=>(s=(s*1664525+1013904223)%4294967296)/4294967296,pick=a=>a[Math.floor(r()*a.length)];
+ const wp=w=>{let t=r()*w.reduce((a,v)=>a+v,0),i=0;while((t-=w[i])>=0)i++;return i};
+ const W={Goa:[9,8,5,2,1,1,1,2,3,6,9,10],Ooty:[3,4,8,10,10,4,3,3,4,5,3,4],Munnar:[4,5,5,4,3,7,9,9,6,5,4,6],Manali:[4,3,3,8,10,10,5,3,3,4,3,5],Jaipur:[8,8,5,2,1,1,1,2,4,8,10,10],Kodaikanal:[3,4,7,9,10,5,3,3,4,4,3,4],Andaman:[7,8,8,6,3,1,1,2,3,6,8,10],Darjeeling:[3,4,8,10,8,3,2,2,5,9,8,4]};
+ const P=[['Goa Beach Escape','Goa',4,12000,10],['Ooty Hill Retreat','Ooty',3,8000,12],['Munnar Tea Trails','Munnar',4,9500,8],['Manali Snow Adventure','Manali',6,18000,10],['Jaipur Royal Heritage','Jaipur',5,15000,10],['Kodaikanal Mist Trail','Kodaikanal',3,7500,12],['Andaman Island Hopper','Andaman',6,28000,10],['Darjeeling Tea Escape','Darjeeling',5,16000,10],['Goa Party Weekend','Goa',3,9000,14],['Manali Family Break','Manali',5,14500,12],['Munnar Honeymoon','Munnar',4,11000,6],['Jaipur Budget Tour','Jaipur',4,10500,14]].map((x,i)=>({id:i+1,name:x[0],dest:x[1],days:x[2],price:x[3],cap:x[4]}));
+ const F=['Arjun','Priya','Vikram','Lakshmi','Ravi','Anita','Suresh','Deepa','Manoj','Kavya','Rahul','Sneha'],L=['Kumar','Devi','Raj','Babu','Nair','Iyer','Reddy','Pillai','Menon','Gupta'];
+ const c=Array.from({length:60},(_,i)=>({id:i+1,name:pick(F)+' '+pick(L),phone:String(6e9+Math.floor(r()*4e9)),email:`user${i+1}@example.com`}));
+ const b=[],y=[],used={},T=today();
+ while(b.length<320){
+  const p=pick(P),td=new Date(pick([2026,2027]),wp(W[p.dest]),1+Math.floor(r()*28));
+  let bd=new Date(td);bd.setDate(td.getDate()-10-Math.floor(r()*80));
+  if(fd(bd)>T){bd=new Date();bd.setDate(bd.getDate()-Math.floor(r()*30))}
+  const n=pick([1,2,2,2,3,4,5,6]),k=p.id+fd(td),can=r()<.12;
+  if((used[k]||0)+n>p.cap)continue;
+  const id=b.length+1,amt=p.price*n,m=pick(METHODS);
+  const o={id,cid:pick(c).id,pid:p.id,n,bd:fd(bd),td:fd(td),st:'CONFIRMED',amt,cd:null,cr:null,rf:0};
+  const q={id,bid:id,amt,m,s:'PAID',d:o.bd,rf:0};
+  if(can){const cd=new Date(bd);cd.setDate(bd.getDate()+1+Math.floor(r()*8));if(cd>=td)cd.setTime(bd.getTime());
+   o.st='CANCELLED';o.cd=fd(cd);o.cr=pick(['Change of plans','Health issue','Work commitment','Family emergency']);o.rf=Math.round(amt*refPct(o.cd,o.td));q.s='REFUNDED';q.rf=o.rf}
+  else{used[k]=(used[k]||0)+n;if(o.td>T&&r()<.3){q.s='PENDING';q.m=null;q.d=null}}
+  b.push(o);y.push(q)}
+ return{c,p:P,b,y}}
+let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!S)S=seed();
+let API=false,tm;
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}if(API){clearTimeout(tm);tm=setTimeout(push,300)}};
+async function push(){try{const r=await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(S)});
+ if(!r.ok){const j=await r.json().catch(()=>({}));toast(j.error||'The database rejected this change.',1);const g=await fetch('/api/state');S=await g.json();render()}}
+ catch(e){toast('Could not reach the database server. Changes are kept in this browser only.',1)}}
+async function boot(){try{const r=await fetch('/api/state');if(!r.ok)return;const j=await r.json();API=true;
+ if(j.c.length||j.p.length||j.b.length){S=j;try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}render()}else push()}catch(e){}}
+const nid=a=>Math.max(0,...a.map(x=>x.id))+1;
+const pk=id=>S.p.find(x=>x.id==id),cu=id=>S.c.find(x=>x.id==id),py=bid=>S.y.find(y=>y.bid==bid);
+const seats=(pid,td)=>pk(pid).cap-S.b.filter(b=>b.st=='CONFIRMED'&&b.pid==pid&&b.td==td).reduce((a,b)=>a+b.n,0);
+const net=y=>y.s=='PAID'?y.amt:y.s=='REFUNDED'?y.amt-y.rf:0;
+function refPct(cd,td){const d=Math.round((new Date(td)-new Date(cd))/864e5);return d>=15?.9:d>=7?.5:0}
+const fail=m=>{throw new Error(m)};
+/* ---------- business logic (same rules as the Java app) ---------- */
+function addCustomer(name,phone,email){
+ if(!name.trim())fail('Customer name is required.');
+ if(!/^\d{10}$/.test(phone))fail('Phone must be exactly 10 digits.');
+ if(!/^[\w.+-]+@[\w-]+(\.[\w-]+)+$/.test(email))fail('Invalid email address.');
+ if(S.c.some(c=>c.email.toLowerCase()==email.toLowerCase()))fail('Email already registered.');
+ S.c.push({id:nid(S.c),name:name.trim(),phone,email:email.toLowerCase()})}
+function addPackage(name,dest,days,price,cap){
+ if(!name.trim()||!dest.trim())fail('Package name and destination are required.');
+ if(!(days>0))fail('Duration must be positive.');if(!(price>0))fail('Price must be positive.');if(!(cap>0))fail('Capacity must be positive.');
+ S.p.push({id:nid(S.p),name:name.trim(),dest:dest.trim(),days,price,cap})}
+function book(cid,pid,n,td){
+ if(!cu(cid)||!pk(pid))fail('Choose a customer and a package.');
+ if(!(n>=1))fail('Number of travelers must be at least 1.');
+ if(!td||td<=today())fail('Travel date must be after today.');
+ const left=seats(pid,td);if(n>left)fail(`Only ${left} seat(s) left for ${pk(pid).name} on ${td}.`);
+ const id=nid(S.b),amt=pk(pid).price*n;
+ S.b.push({id,cid:+cid,pid:+pid,n,bd:today(),td,st:'CONFIRMED',amt,cd:null,cr:null,rf:0});
+ S.y.push({id:nid(S.y),bid:id,amt,m:null,s:'PENDING',d:null,rf:0});return id}
+function pay(bid,m){const b=S.b.find(x=>x.id==bid),y=py(bid);
+ if(b.st!='CONFIRMED')fail('Cannot pay for a cancelled booking.');if(y.s=='PAID')fail('Booking is already paid.');
+ y.m=m;y.d=today();y.s='PAID'}
+function cancel(bid,reason){const b=S.b.find(x=>x.id==bid),y=py(bid),t=today();
+ if(b.st!='CONFIRMED')fail('Booking is already cancelled.');if(t>b.td)fail('Cannot cancel after the travel date.');
+ if(y.s=='PAID'){y.rf=Math.round(y.amt*refPct(t,b.td));y.s='REFUNDED';b.rf=y.rf}else y.s='CANCELLED';
+ b.st='CANCELLED';b.cd=t;b.cr=reason.trim()||'Not specified'}
+/* ---------- UI ---------- */
+const PAGES=[['dashboard','Dashboard'],['book','New booking'],['bookings','Bookings'],['packages','Packages'],['customers','Customers'],['reports','Reports']];
+let charts=[];
+function toast(m,err){const t=$('#toast');t.textContent=m;t.className=err?'err':'';t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3500)}
+function run(fn,ok){try{fn();save();if(ok)toast(ok);render()}catch(e){toast(e.message,1)}}
+function render(){
+ const h=(location.hash||'#dashboard').slice(1),pg=PAGES.some(p=>p[0]==h)?h:'dashboard';
+ $('#nav').innerHTML='<div class="brand">Travel Desk</div>'+PAGES.map(p=>`<a href="#${p[0]}" class="${p[0]==pg?'on':''}">${p[1]}</a>`).join('')+'<button id="reset">Reset demo data</button>';
+ $('#reset').onclick=()=>{if(confirm('Replace all data with fresh demo data?')){S=seed();save();render()}};
+ charts.forEach(c=>c.destroy());charts=[];
+ $('#main').innerHTML=VIEWS[pg]();if(AFTER[pg])AFTER[pg]()}
+const ok=()=>S.b.filter(b=>b.st=='CONFIRMED');
+const group=(arr,f,v=()=>1)=>{const m={};arr.forEach(x=>{const k=f(x);m[k]=(m[k]||0)+v(x)});return m};
+const VIEWS={
+dashboard(){
+ const a=ok(),rev=S.y.reduce((s,y)=>s+net(y),0),cr=S.b.length?S.b.filter(b=>b.st=='CANCELLED').length/S.b.length*100:0;
+ const dep={};a.filter(b=>b.td>=today()).forEach(b=>{const k=b.td+'|'+b.pid;dep[k]=(dep[k]||0)+b.n});
+ const rows=Object.entries(dep).sort().slice(0,8).map(([k,n])=>{const[d,id]=k.split('|'),p=pk(id),left=p.cap-n,st=left<=0?['full','Full']:left<=p.cap*.2?['fill','Filling']:['open','Open'];
+  return`<tr><td>${d}</td><td>${esc(p.name)}</td><td>${esc(p.dest)}</td><td>${n}/${p.cap}</td><td><span class="tag ${st[0]}">${st[1]}</span></td></tr>`}).join('');
+ return`<h1>Tourism dashboard</h1><div class="kpis">
+ <div class="card kpi"><b>${a.length}</b><span>confirmed bookings</span></div>
+ <div class="card kpi"><b>${a.reduce((s,b)=>s+b.n,0)}</b><span>travelers</span></div>
+ <div class="card kpi"><b>${inr(rev)}</b><span>net revenue after refunds</span></div>
+ <div class="card kpi"><b>${cr.toFixed(1)}%</b><span>cancellation rate</span></div></div>
+ <div class="board"><h2>Upcoming departures</h2><div class="tbl"><table><tr><th>Date</th><th>Package</th><th>Destination</th><th>Seats taken</th><th>Status</th></tr>${rows||'<tr><td colspan="5">No upcoming departures. Create a booking to add one.</td></tr>'}</table></div></div>
+ <div class="grid2"><div class="card"><h3>Most popular destinations (travelers)</h3><div class="ch"><canvas id="c1"></canvas></div></div>
+ <div class="card"><h3>Booking share by destination</h3><div class="ch"><canvas id="c2"></canvas></div></div>
+ <div class="card"><h3>Monthly booking trend (by travel month)</h3><div class="ch"><canvas id="c3"></canvas></div></div>
+ <div class="card"><h3>Net revenue by package</h3><div class="ch"><canvas id="c4"></canvas></div></div></div>
+ <div class="card"><h3>Seasonal pattern: bookings by destination and travel month</h3><div class="tbl">${heat()}</div></div>`},
+book(){
+ return`<h1>New booking</h1><div class="card" style="margin-top:16px"><form class="f" id="bf">
+ <label>Customer<select id="bc"><option value="new">+ New customer</option>${S.c.map(c=>`<option value="${c.id}">${c.id} - ${esc(c.name)}</option>`).join('')}</select></label>
+ <label class="nc">New customer name<input id="nn"></label><label class="nc">Phone (10 digits)<input id="np" inputmode="numeric"></label><label class="nc">Email<input id="ne" type="email"></label>
+ <label>Package<select id="bp">${S.p.map(p=>`<option value="${p.id}">${esc(p.name)} (${esc(p.dest)}, ${inr(p.price)})</option>`).join('')}</select></label>
+ <label>Travel date<input type="date" id="bt" required></label>
+ <label>Travelers<input type="number" id="bn" min="1" value="2"></label>
+ <button>Confirm booking</button></form><p class="note" id="bi">Pick a travel date to check availability.</p></div>`},
+bookings(){
+ return`<h1>Bookings</h1><p class="note"><label style="display:inline-grid">Show <select id="fs"><option value="">All</option><option>CONFIRMED</option><option>CANCELLED</option></select></label></p>
+ <div class="card tbl"><table class="t"><tr><th>ID</th><th>Customer</th><th>Package</th><th>Travel date</th><th>Travelers</th><th>Amount</th><th>Status</th><th>Payment</th><th></th></tr>
+ ${[...S.b].reverse().map(b=>{const y=py(b.id);return`<tr data-s="${b.st}"><td>${b.id}</td><td>${esc(cu(b.cid)?.name)}</td><td>${esc(pk(b.pid)?.name)}</td><td>${b.td}</td><td>${b.n}</td><td>${inr(b.amt)}</td><td class="st-${b.st}">${b.st}</td><td>${y.s}</td>
+ <td><button class="sm alt" data-a="view" data-id="${b.id}">Details</button> ${b.st=='CONFIRMED'?`${y.s!='PAID'?`<button class="sm" data-a="pay" data-id="${b.id}">Pay</button> `:''}<button class="sm bad" data-a="cancel" data-id="${b.id}">Cancel</button>`:''}</td></tr>`}).join('')}</table></div>`},
+packages(){
+ return`<h1>Packages</h1><div class="card" style="margin:16px 0"><h3>Add package</h3><form class="f" id="pf"><label>Name<input name="a" required></label><label>Destination<input name="b" required></label>
+ <label>Days<input name="c" type="number" min="1" required></label><label>Price per person<input name="d" type="number" min="1" required></label><label>Max travelers per departure<input name="e" type="number" min="1" required></label><button>Add package</button></form></div>
+ <div class="card tbl"><table class="t"><tr><th>ID</th><th>Package</th><th>Destination</th><th>Days</th><th>Price</th><th>Capacity</th></tr>${S.p.map(p=>`<tr><td>${p.id}</td><td>${esc(p.name)}</td><td>${esc(p.dest)}</td><td>${p.days}</td><td>${inr(p.price)}</td><td>${p.cap}</td></tr>`).join('')}</table></div>`},
+customers(){
+ return`<h1>Customers</h1><div class="card" style="margin:16px 0"><h3>Register customer</h3><form class="f" id="cf"><label>Name<input name="a" required></label><label>Phone (10 digits)<input name="b" required inputmode="numeric"></label><label>Email<input name="c" type="email" required></label><button>Register</button></form></div>
+ <div class="card tbl"><table class="t"><tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Bookings</th></tr>${S.c.map(c=>`<tr><td>${c.id}</td><td>${esc(c.name)}</td><td>${esc(c.phone)}</td><td>${esc(c.email)}</td><td>${S.b.filter(b=>b.cid==c.id).length}</td></tr>`).join('')}</table></div>`},
+reports(){
+ const rp=S.p.map(p=>{const bs=S.b.filter(b=>b.pid==p.id),o=bs.filter(b=>b.st=='CONFIRMED');return{name:p.name,c:o.length,t:o.reduce((s,b)=>s+b.n,0),x:bs.length-o.length,r:bs.reduce((s,b)=>s+net(py(b.id)),0)}});
+ const dp=Object.entries(group(ok(),b=>pk(b.pid).dest,b=>b.n)).sort((a,b)=>b[1]-a[1]);
+ return`<h1>Reports</h1><p class="note"><button class="alt" id="csv">Download bookings CSV</button></p>
+ <div class="card tbl" style="margin-bottom:16px"><h3>Package bookings and revenue</h3><table class="t"><tr><th>Package</th><th>Confirmed</th><th>Travelers</th><th>Cancelled</th><th>Net revenue</th></tr>${rp.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.c}</td><td>${r.t}</td><td>${r.x}</td><td>${inr(r.r)}</td></tr>`).join('')}<tr><th>Total</th><th>${rp.reduce((s,r)=>s+r.c,0)}</th><th>${rp.reduce((s,r)=>s+r.t,0)}</th><th>${rp.reduce((s,r)=>s+r.x,0)}</th><th>${inr(rp.reduce((s,r)=>s+r.r,0))}</th></tr></table></div>
+ <div class="card tbl"><h3>Destination popularity</h3><table class="t"><tr><th>Rank</th><th>Destination</th><th>Travelers</th></tr>${dp.map((d,i)=>`<tr><td>${i+1}</td><td>${esc(d[0])}</td><td>${d[1]}</td></tr>`).join('')}</table></div>`}};
+function heat(){
+ const ds=[...new Set(S.p.map(p=>p.dest))].sort(),m={};ok().forEach(b=>{const k=pk(b.pid).dest+'|'+(+b.td.slice(5,7)-1);m[k]=(m[k]||0)+1});
+ const mx=Math.max(1,...Object.values(m));
+ return`<table class="t hm"><tr><th></th>${MON.map(x=>`<th>${x}</th>`).join('')}</tr>${ds.map(d=>`<tr><th>${esc(d)}</th>${MON.map((_,i)=>{const v=m[d+'|'+i]||0;return`<td style="background:rgba(14,79,92,${(v/mx).toFixed(2)});color:${v/mx>.5?'#fff':'#12262b'}">${v}</td>`}).join('')}</tr>`).join('')}</table>`}
+const PAL=['#0e4f5c','#f2b134','#c93f56','#2a8f6f','#6c7fd1','#e07b39','#7a9aa1','#9c6ade'];
+const AFTER={
+dashboard(){
+ const a=ok(),mk=(id,cfg)=>charts.push(new Chart($(id),cfg)),opt={maintainAspectRatio:false};
+ const pop=Object.entries(group(a,b=>pk(b.pid).dest,b=>b.n)).sort((x,y)=>y[1]-x[1]);
+ mk('#c1',{type:'bar',data:{labels:pop.map(x=>x[0]),datasets:[{data:pop.map(x=>x[1]),backgroundColor:'#0e4f5c'}]},options:{...opt,indexAxis:'y',plugins:{legend:{display:false}}}});
+ const sh=Object.entries(group(a,b=>pk(b.pid).dest));
+ mk('#c2',{type:'pie',data:{labels:sh.map(x=>x[0]),datasets:[{data:sh.map(x=>x[1]),backgroundColor:PAL}]},options:opt});
+ const tr=Object.entries(group(a,b=>b.td.slice(0,7))).sort();
+ mk('#c3',{type:'line',data:{labels:tr.map(x=>x[0]),datasets:[{data:tr.map(x=>x[1]),borderColor:'#c93f56',backgroundColor:'#c93f56',tension:.25}]},options:{...opt,plugins:{legend:{display:false}}}});
+ const rv=Object.entries(group(S.b,b=>pk(b.pid).name,b=>net(py(b.id)))).sort((x,y)=>y[1]-x[1]);
+ mk('#c4',{type:'bar',data:{labels:rv.map(x=>x[0]),datasets:[{data:rv.map(x=>x[1]),backgroundColor:'#f2b134'}]},options:{...opt,indexAxis:'y',plugins:{legend:{display:false}}}})},
+book(){
+ const info=()=>{const p=$('#bp').value,t=$('#bt').value,n=+$('#bn').value||0;
+  $('#bi').textContent=t?`Seats left on ${t}: ${seats(p,t)}. Amount: ${inr(pk(p).price*n)}.`:'Pick a travel date to check availability.'};
+ ['#bp','#bt','#bn'].forEach(s=>$(s).oninput=info);
+ $('#bt').min=new Date(Date.now()+864e5).toLocaleDateString('en-CA');
+ const tg=()=>document.querySelectorAll('.nc').forEach(l=>l.style.display=$('#bc').value=='new'?'grid':'none');
+ $('#bc').onchange=tg;tg();
+ $('#bf').onsubmit=e=>{e.preventDefault();let id,msg;
+  run(()=>{let added=false;try{let cid=+$('#bc').value;
+   if($('#bc').value=='new'){addCustomer($('#nn').value,$('#np').value,$('#ne').value);added=true;cid=S.c[S.c.length-1].id}
+   id=book(cid,+$('#bp').value,+$('#bn').value,$('#bt').value);msg=added?' New customer registered.':''}
+   catch(err){if(added)S.c.pop();throw err}},'');
+  if(id){toast('Booking '+id+' confirmed. Payment is pending.'+msg);location.hash='bookings'}}},
+bookings(){
+ $('#fs').onchange=e=>document.querySelectorAll('tr[data-s]').forEach(r=>r.hidden=e.target.value&&r.dataset.s!=e.target.value)},
+packages(){$('#pf').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);run(()=>addPackage(f.get('a'),f.get('b'),+f.get('c'),+f.get('d'),+f.get('e')),'Package added.')}},
+customers(){$('#cf').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);run(()=>addCustomer(f.get('a'),f.get('b'),f.get('c')),'Customer registered.')}},
+reports(){$('#csv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const rows=[['booking_id','customer','package','destination','travelers','booking_date','travel_date','status','amount','payment_status','payment_method','refund']];
+ S.b.forEach(b=>{const y=py(b.id);rows.push([b.id,cu(b.cid)?.name,pk(b.pid).name,pk(b.pid).dest,b.n,b.bd,b.td,b.st,b.amt,y.s,y.m||'',b.rf])});
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='bookings.csv';a.click()}}};
+/* dialogs: details / pay / cancel */
+$('#main').addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;
+ const id=+t.dataset.id,b=S.b.find(x=>x.id==id),y=py(id),d=$('#dlg');
+ const close='<p style="text-align:right;margin:16px 0 0"><button class="alt" onclick="dlg.close()">Close</button></p>';
+ if(t.dataset.a=='view')d.innerHTML=`<h2>Booking ${id}</h2><p>${esc(cu(b.cid)?.name)}<br>${esc(pk(b.pid).name)} (${esc(pk(b.pid).dest)}, ${pk(b.pid).days} days)<br>${b.n} traveler(s) - booked ${b.bd}, travel ${b.td}<br>Amount ${inr(b.amt)} - <span class="st-${b.st}">${b.st}</span></p>
+  <p>Payment: ${y.s}${y.m?' by '+y.m:''}${y.d?' on '+y.d:''}${y.rf?'<br>Refund '+inr(y.rf):''}${b.cr?'<br>Cancelled '+b.cd+': '+esc(b.cr):''}</p>${close}`;
+ if(t.dataset.a=='pay')d.innerHTML=`<h2>Record payment</h2><p>Booking ${id}: ${inr(b.amt)}</p><form id="pyf" class="f"><label>Method<select id="pm">${METHODS.map(m=>`<option>${m}</option>`).join('')}</select></label><button>Mark as paid</button></form>${close}`;
+ if(t.dataset.a=='cancel'){const pct=y.s=='PAID'?refPct(today(),b.td):0;
+  d.innerHTML=`<h2>Cancel booking ${id}</h2><p>${y.s=='PAID'?`Refund: ${pct*100}% = ${inr(y.amt*pct)} (90% if 15+ days before travel, 50% for 7-14 days, none under 7).`:'Payment is not made, so nothing to refund.'}</p><form id="cnf" class="f"><label>Reason<input id="cr"></label><button class="bad">Cancel booking</button></form>${close}`}
+ d.showModal();
+ const pf=$('#pyf'),cf=$('#cnf');
+ if(pf)pf.onsubmit=ev=>{ev.preventDefault();d.close();run(()=>pay(id,$('#pm').value),'Payment recorded.')};
+ if(cf)cf.onsubmit=ev=>{ev.preventDefault();const r=$('#cr').value;d.close();run(()=>cancel(id,r),'Booking cancelled. Seats released.')}});
+addEventListener('hashchange',render);render();boot();
+</script></body></html>
