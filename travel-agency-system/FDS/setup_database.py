@@ -42,7 +42,7 @@ def main(n_bookings=500, seed=42):
     con = db.connect()
     db.reset_tables(con)
     run_script(con, db.SCHEMA.read_text())
-    run_script(con, (ROOT / "sql" / "sample_data.sql").read_text())
+    run_script(con, (ROOT / "DBMS" / "sample_data.sql").read_text())
 
     for d in NEW_DEST:
         q(con, "INSERT INTO destination(destination_name) VALUES (?)", (d,))
