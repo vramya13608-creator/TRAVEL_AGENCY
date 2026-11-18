@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 IS_SQLITE = bool(os.getenv("USE_SQLITE"))
 SQLITE_FILE = ROOT / "data" / "travel_agency.db"
-SCHEMA = ROOT / "sql" / ("sqlite/schema.sql" if IS_SQLITE else "schema.sql")
+SCHEMA = ROOT / "DBMS" / ("sqlite/schema.sql" if IS_SQLITE else "schema.sql")
 
 
 def connect():
