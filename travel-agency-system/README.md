@@ -1,14 +1,12 @@
 # Travel Agency Booking and Tourism Trend Analysis System
-Project-Based Assessment | Scenario 21 | Velalar College of Engineering and Technology, Dept. of IT | Class 25IT3A&B | AY 2026-27 (odd)
-Register Nos.: 21, 51, 81, 111
 
 ## Description
 | Subject | Part | Location |
 |---|---|---|
-| Software Engineering | SRS, use case / class / architecture / ER diagrams, test plan and results | `docs/` |
+| Software Engineering | SRS, use case / class / architecture / ER diagrams, test plan and results | `Software_engineering` |
 | Java Programming | Console booking application (customers, packages, booking, capacity check, payment, cancellation, reports) | `java/` |
-| DBMS | PostgreSQL schema (3NF), sample data, 8 report queries, normalization | `sql/`, `docs/normalization.md` |
-| Foundations of Data Science | Python retrieval from PostgreSQL, cleaning, 5 visualizations, observations | `python/` |
+| DBMS | PostgreSQL schema (3NF), sample data, 8 report queries, normalization | `DBMS` |
+| Foundations of Data Science | Python retrieval from PostgreSQL, cleaning, 5 visualizations, observations | `FDS` |
 | Web dashboard | Website with every feature, backed by the same PostgreSQL database | `web/index.html`, `python/server.py` |
 
 Data flow: Java app / website -> **PostgreSQL** (`travel_agency`) -> Python analysis -> charts in `python/output/`.
@@ -18,9 +16,9 @@ Java 17+ (JDBC), **PostgreSQL + pgAdmin**, Python 3.9+ (psycopg2, pandas, matplo
 
 ## Folder structure
 ```
-docs/     SRS.md, design.md (diagrams), normalization.md, testing.md, test_results.txt
-java/     src/travelagency/*.java, test/TestRunner.java
-sql/      schema.sql, sample_data.sql, queries.sql (PostgreSQL);  sqlite/ = offline-testing copy only
+Software_engineering     SRS.md, use_case_diagram.png,class_diagram.png,system_architechture.png, testing.md, test_results.txt
+java/     src/travelagency/*.java, test/TestRunner.java, sampleInput.txt , SampleOutput.txt
+sql/      schema.sql, sample_data.sql, queries.sql (PostgreSQL);  sqlite/ = offline-testing copy only, er_diagram,normalisation.md
 python/   db.py, setup_database.py, analysis.py, server.py, output/
 web/      index.html (dashboard)
 lib/      put the PostgreSQL JDBC jar here
