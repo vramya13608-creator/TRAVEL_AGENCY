@@ -35,17 +35,9 @@ Actual results are taken from a real run of `TestRunner` (`docs/test_results.txt
 | TC-18 | Black box / functional | Pay booking 1 by UPI | PAID | PAID | PASS |
 | TC-19 | Black box / functional | Pay the same booking twice | ERROR: Booking is already paid. | ERROR: Booking is already paid. | PASS |
 | TC-20 | Black box / EP | Invalid payment method BITCOIN | ERROR: Payment method must be one of [CASH, NET_BANKING, UPI, CARD] | ERROR: Payment method must be one of [CASH, NET_BANKING, UPI, CARD] | PASS |
-| TC-21 | Black box / BVA | Refund % at 15 days before travel | 0.9 | 0.9 | PASS |
-| TC-22 | Black box / BVA | Refund % at 14 days before travel | 0.5 | 0.5 | PASS |
-| TC-23 | Black box / BVA | Refund % at 7 days before travel | 0.5 | 0.5 | PASS |
-| TC-24 | Black box / BVA | Refund % at 6 days before travel | 0.0 | 0.0 | PASS |
-| TC-25 | Black box / functional | Cancel paid booking 1 (34 days ahead) | 32400.0 | 32400.0 | PASS |
-| TC-26 | Black box / functional | Seats freed after cancellation (10-7 booked) | 3 | 3 | PASS |
-| TC-27 | Black box / functional | Cancel same booking again | ERROR: Booking 1 is already cancelled. | ERROR: Booking 1 is already cancelled. | PASS |
-| TC-28 | Black box / functional | Cancel unpaid booking 2 -> payment status | CANCELLED | CANCELLED | PASS |
-| TC-29 | Black box / functional | Cannot pay for cancelled booking | ERROR: Cannot pay for a cancelled booking. | ERROR: Cannot pay for a cancelled booking. | PASS |
-| TC-30 | White box / branch | Net revenue: PAID + REFUNDED + PENDING | 25200.0 | 25200.0 | PASS |
-| TC-31 | White box / branch | Destination popularity counts only confirmed | {Goa=3} | {Goa=3} | PASS |
+| TC-22 | Black box / functional | Cannot pay for cancelled booking | ERROR: Cannot pay for a cancelled booking. | ERROR: Cannot pay for a cancelled booking. | PASS |
+| TC-23 | White box / branch | Net revenue: PAID + REFUNDED + PENDING | 25200.0 | 25200.0 | PASS |
+| TC-24 | White box / branch | Destination popularity counts only confirmed | {Goa=3} | {Goa=3} | PASS |
 
 **Summary:** 31 passed, 0 failed, 31 total
 
