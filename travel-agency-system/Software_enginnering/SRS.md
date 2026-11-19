@@ -1,7 +1,5 @@
 # Software Requirements Specification (SRS)
 **Project:** Travel Agency Booking and Tourism Trend Analysis System
-**Scenario:** 21 | **Class:** 25IT3A&B | **Dept:** Information Technology, Velalar College of Engineering and Technology
-**Version:** 1.0
 
 ## 1. Introduction
 ### 1.1 Purpose
