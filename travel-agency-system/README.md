@@ -10,6 +10,8 @@
 | Foundations of Data Science | Python data retrieval, cleaning, five visualizations and observations | `FDS/` |
 | Web Dashboard | Website for booking and viewing travel information, connected to PostgreSQL through Flask | `web/`, `FDS/server.py` |
 
+https://travel-agency-jdf8.onrender.com/#dashboard
+ 
 **Data flow:** Java console application and web dashboard → PostgreSQL (`travel_agency`) → Python analysis → charts and reports.
 
 ## Technologies
