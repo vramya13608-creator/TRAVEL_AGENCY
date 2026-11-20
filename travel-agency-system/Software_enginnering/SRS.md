@@ -26,16 +26,17 @@ WanderWise simplifies travel agency operations through a web application. It red
 - **Admin:** Manages customers, packages, bookings, and payments.
 - **Customer:** Registers, views packages, and makes bookings.
 
-## 3. Functional Requirements
-
-1. **Customer Management:** Register and view customer details.
-2. **Destination Management:** Maintain tourist destination information.
-3. **Package Management:** Add and manage travel packages.
-4. **Booking Management:** Create bookings for registered customers.
-5. **Availability Management:** Check package capacity and prevent overbooking.
-6. **Payment Management:** Maintain payment details and status.
-7. **Cancellation:** Cancel bookings and update booking status.
-8. **Trend Analysis:** Analyse booking data and generate visualizations using Python.
+### 3. Functional Requirements
+1. Maintain customer details, including customer ID, name, contact information, and email 
+address.
+2. Maintain travel package details, including package ID, destination, duration, price, and 
+maximum capacity.
+3. Allow customers to book travel packages and specify the number of travelers.
+4. Check package availability and prevent bookings beyond the maximum capacity.
+5. Record booking dates, travel dates, payment status, and booking cancellation details.
+6. Generate reports on package bookings, destination popularity, and booking revenue.
+7. Retrieve booking data from the database, preprocess it, and generate visualizations using 
+Python.
 
 ## 4. Non-Functional Requirements
 
