@@ -8,7 +8,7 @@
 To develop a system that manages customers, travel packages, bookings, payments, and tourism-related data efficiently.
 
 ### 1.2 Scope
-WanderWise simplifies travel agency operations through a web application. It reduces manual work, manages bookings, and supports tourism trend analysis.
+Traveldesk simplifies travel agency operations through a web application. It reduces manual work, manages bookings, and supports tourism trend analysis.
 
 ## 2. Overall Description
 
